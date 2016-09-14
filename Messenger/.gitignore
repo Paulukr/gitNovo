@@ -1,0 +1,8 @@
+/bin/
+/.classpath
+/.project
+/desktop.ini
+
+*.ini
+*.prefs
+*.jar
