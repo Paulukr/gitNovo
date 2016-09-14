@@ -4,21 +4,26 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.invoke.MethodHandles;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Serv2a1 {
+	final static  double version = 3.8 ;//:)
 //v3.7 this version is about versioning, not inheritance, but uses architecture of 2b, and maybe deeping it.//not an object of right en
 	//threads
 	Thread commandLineHandler = new Thread(new CommandLineHandler());
 	Thread hostingThread = new Thread(() -> host());
 	
 	//roles
-	int sql;
-	int beacon;//Beacon
+//	int sql;
+//	int beacon;//Beacon
+	Map<String, Integer> roles = new HashMap<String, Integer>();
 	
 	int clientCount = 0;
 	ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();;
@@ -122,7 +127,7 @@ public class Serv2a1 {
 	}
 	public void go()
 	{
-		System.out.println("ChatServTest2a start" + "vx.3.7");
+		System.out.println("ChatServTest2a " + version + " start");
 		commandLineHandler.start();	
 		hostingThread.start();	 
 	}
@@ -157,7 +162,11 @@ public class Serv2a1 {
 	public static void main(String[] args) {
 			
 		Serv2a1 test2a = new Serv2a1();
+		System.out.println("object: " + test2a.getClass().getSimpleName() + "\nclass: " + MethodHandles.lookup().lookupClass());
 		test2a.go();
+//		String[] formain = {"Yahoo", "calabunga"};
+//		main(formain);
+		
 	}
 
 	void close() {
