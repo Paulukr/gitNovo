@@ -12,12 +12,16 @@ import java.util.Scanner;
 
 public class Serv2a1 {
 //v3.7 this version is about versioning, not inheritance, but uses architecture of 2b, and maybe deeping it.//not an object of right en
+	//threads
+	Thread commandLineHandler = new Thread(new CommandLineHandler());
+	Thread hostingThread = new Thread(() -> host());
+	
 	//roles
 	int sql;
 	int beacon;//Beacon
 	
 	int clientCount = 0;
-	ArrayList<ClientHandler> clients;
+	ArrayList<ClientHandler> clients = new ArrayList<ClientHandler>();;
 	
 	public class ClientHandler implements Runnable
 	{
@@ -34,9 +38,9 @@ public class Serv2a1 {
 		
 		public ClientHandler(Socket clientSocket)
 		{
-			 handleCommand("Hello");
-			 Serv2a1.this.handleCommand("Hello");
-			 Serv2a1.this.clientCount = 0;
+//			 handleCommand("Hello");
+//			 Serv2a1.this.handleCommand("Hello");
+//			 Serv2a1.this.clientCount = 0;
 			socket = clientSocket;
 			
 			try {
@@ -63,33 +67,32 @@ public class Serv2a1 {
 				try {
 					while ((message = reader.readLine())!=null)
 					{
-						if( message.startsWith("/") ) handleCommand(message);
+						if( message.startsWith("/") ) if(handleClientCommand(this,message) == -1) break;
 						
 						System.out.println("read " + clientNo + " " + message);
 						if(!pureOutput) tellEveryone(clientNo + ": " + message);
 						else tellEveryone(message);
 					}
 				} catch (IOException e) {e.printStackTrace();}			
-		}
-		void handleCommand(String command){
-			
-			if( command.equalsIgnoreCase("/pureOutputOn") ){
-				pureOutput = true;
-				System.out.println("client " + clientNo + "  pure output =  " + pureOutput);
-			}
-			if( command.equalsIgnoreCase("/pureOutputOff") ){
-				pureOutput = false;
-				System.out.println("client " + clientNo + "  pure output =  " + pureOutput);
-			}
-			if( command.equalsIgnoreCase("/close") ){
-				System.out.println("client " + clientNo + "  to close  " + pureOutput);
-				clients.set(clientNo-1, null);
-			}
-			System.out.println("client " + clientNo + "  no such command  " + command);
-		}
-		
+		}	
 	}//end inner class
-	void handleCommand(String command){System.out.println("Outer");}
+	int handleClientCommand(ClientHandler clientHandler, String command){
+		clientCount++;
+		if( command.equalsIgnoreCase("/pureOutputOn") ){
+			clientHandler.pureOutput = true;
+			System.out.println("client " + clientHandler.clientNo + "  pure output =  " + clientHandler.pureOutput);
+		}
+		if( command.equalsIgnoreCase("/pureOutputOff") ){
+			clientHandler.pureOutput = false;
+			System.out.println("client " + clientHandler.clientNo + "  pure output =  " + clientHandler.pureOutput);
+		}
+		if( command.equalsIgnoreCase("/close") ){
+			System.out.println("client " + clientHandler.clientNo + "  to close  " + clientHandler.pureOutput);
+			clients.set(clientHandler.clientNo-1, null);
+		}
+		System.out.println("client " + clientHandler.clientNo + "  no such command  " + command);
+		return 0;
+	}
 	public class CommandLineHandler implements Runnable
 	{
 
@@ -98,40 +101,38 @@ public class Serv2a1 {
 			System.out.println("command line start");
 			Scanner keyboard = new Scanner(System.in);
 			String line;
-			while(true)
-			{
+			do{
 				line=keyboard.nextLine();
-				//System.out.println(line);
-				//line.startsWith("c");
-				if(line.equals("close"))
-				{
-					keyboard.close();
-					break;
-				}
-			}
-			
+			}while(handleConsoleCommand(line) != -1);
+			keyboard.close();
 		}
 		
 	}//end inner class
+	protected int handleConsoleCommand(String command) {
+		switch(command) {
+		case "close": close(); return 0;//TODO in test version close don't stop console
+		case "test": System.out.println("test");
+			break;
+			default:
+				//System.out.println("There is no such a command.");
+				return 1;
+		}
+		return 0;
+		//return -1 - close, 0 - command done, 1 - There is no such a command. 1 is for cascading parsers.
+	}
 	public void go()
 	{
 		System.out.println("ChatServTest2a start" + "vx.3.7");
-		Thread commandLineHandler = new Thread(new CommandLineHandler());
 		commandLineHandler.start();	
-		Thread hostingThread = new Thread(() -> host());
-		hostingThread.start();	
-		
-		clients = new ArrayList<ClientHandler>();
+		hostingThread.start();	 
 	}
 	public void host() {
-		try(ServerSocket serverSocket = new ServerSocket(20000);) {		//ServerSocket serverSocket = null;		
-			while(true)			//serverSocket = new ServerSocket(20000);
+		try(ServerSocket serverSocket = new ServerSocket(20000);) {	
+			while(true)			
 			{
 				Socket clientSocket =  serverSocket.accept();
-				clientCount++;
-				
-				ClientHandler clientHandler = new ClientHandler(clientSocket, clientCount);				
-				clients.add(clientHandler);
+				clientCount++;			
+				clients.add(new ClientHandler(clientSocket, clientCount));
 				
 				clients.get(clientCount - 1).writer.println("Hello "+clientCount);
 				tellEveryone("Tell everyone: " + clientCount + " is here");
@@ -159,4 +160,9 @@ public class Serv2a1 {
 		test2a.go();
 	}
 
+	void close() {
+		System.out.println("Server is going to close");
+		//TODO
+	}
+	
 }
