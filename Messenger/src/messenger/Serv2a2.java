@@ -16,7 +16,7 @@ public class Serv2a2 extends Serv2a1 {
 	void log(int clientNo, String message, String whatHappend) {}; 
 	void log(int clientNo, String message, int whatHappend) {}; 
 	void log(int clientNo, String message, String whatHappend, String value) {};
-	void log(int clientNo, String message, String whatHappend, String...values) {}; 
+	void log(int clientNo, String message, String whatHappend, String...values) {};
 	void slog(int clientNo,  String...str) {//String message, String whatHappend, String...values
 		switch(str.length) {
 		case 0: break;
