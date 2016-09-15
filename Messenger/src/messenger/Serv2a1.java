@@ -30,6 +30,8 @@ public class Serv2a1 {
 	
 	public class ClientHandler implements Runnable
 	{
+		String role;
+		String lastMessage;
 		String clientName;
 		PrintWriter writer;
 		Thread clientHandlerThread;
@@ -72,31 +74,33 @@ public class Serv2a1 {
 				try {
 					while ((message = reader.readLine())!=null)
 					{
-						if( message.startsWith("/") ) if(handleClientCommand(this,message) == -1) break;
-						
+						lastMessage = message;
 						System.out.println("read " + clientNo + " " + message);
 						if(!pureOutput) tellEveryone(clientNo + ": " + message);
-						else tellEveryone(message);
+							else tellEveryone(message);
+						if( message.startsWith("/") ) if(handleClientCommand(this,message) == -1) break;
 					}
 				} catch (IOException e) {e.printStackTrace();}			
 		}	
 	}//end inner class
 	int handleClientCommand(ClientHandler clientHandler, String command){
-		clientCount++;
 		if( command.equalsIgnoreCase("/pureOutputOn") ){
 			clientHandler.pureOutput = true;
 			System.out.println("client " + clientHandler.clientNo + "  pure output =  " + clientHandler.pureOutput);
+			return 0;
 		}
 		if( command.equalsIgnoreCase("/pureOutputOff") ){
 			clientHandler.pureOutput = false;
 			System.out.println("client " + clientHandler.clientNo + "  pure output =  " + clientHandler.pureOutput);
+			return 0;
 		}
 		if( command.equalsIgnoreCase("/close") ){
 			System.out.println("client " + clientHandler.clientNo + "  to close  " + clientHandler.pureOutput);
 			clients.set(clientHandler.clientNo-1, null);
+			return 0;
 		}
 		System.out.println("client " + clientHandler.clientNo + "  no such command  " + command);
-		return 0;
+		return 1;
 	}
 	public class CommandLineHandler implements Runnable
 	{
@@ -125,9 +129,10 @@ public class Serv2a1 {
 		return 0;
 		//return -1 - close, 0 - command done, 1 - There is no such a command. 1 is for cascading parsers.
 	}
-	public void go()
+	public void go() 
 	{
-		System.out.println("ChatServTest2a " + version + " start");
+		try {System.out.println("ChatServer " + getClass().getSimpleName() + " with go() version " + getClass().newInstance().version + " start ");
+		} catch (Exception e) {e.printStackTrace();}
 		commandLineHandler.start();	
 		hostingThread.start();	 
 	}
