@@ -3,6 +3,8 @@ package messenger;
 import java.sql.Timestamp;
 import java.time.Instant;
 
+import messenger.AbstractLogger.LogEntry;
+
 abstract class AbstractLogger {
 	
 	int startDaySince1970;
@@ -12,10 +14,12 @@ abstract class AbstractLogger {
 	
 	public abstract void createNewLocal();
 	public abstract void localAddEntry(AbstractLogEntry entry);
+	public abstract void localAddEntry(LogEntry entry);
 	//addToDBQueue()
-	public abstract void pushLastLocalStore();
+	public abstract void pushLastLocalStore();//adds local log just added to local store to the queue of db queries
+//	now it seems useless, because I can check if there anything in local store every pushDBQueue call. But there can be a problem with right sequence of adding new
+//	tables and inserting local stores into it
 	public abstract void createNewTable();
-	public abstract void createNewLocalStore();
 	public abstract void pushDBQueue();
 	
 	public void log(LogEntry entry) {
@@ -63,4 +67,5 @@ abstract class AbstractLogger {
 			ts  = Timestamp.from(Instant.now());
 		}
 	}//end inner class
+
 }
