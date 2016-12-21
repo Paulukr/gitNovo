@@ -10,16 +10,24 @@ package mp2.ng.hw.Battleship;
  */
 public abstract class Player {
 	String name;
-	int [][] trackingField;
+	Field field;
+	
 	public static class Point{
 		int x;
 		int y;
 	}
 	public abstract Point makeShot();
-	public abstract Point setResult(String s);
+
+	public abstract Point setResult(Field.AtackResult atackResult);
 	public abstract void updateOwnView(String field);
 	public abstract void updateEnemyView(String field);
+	public Field.AtackResult surviveBombardment(Point point){
+		return field.surviveBombardment(point.x, point.y);
+	}
 	public String toString(){
 		return name;	
+	}
+	public String renderForEnemy() {
+		return field.renderForEnemy();
 	}
 }

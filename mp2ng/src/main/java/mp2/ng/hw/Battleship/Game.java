@@ -25,40 +25,27 @@ public class Game {
 	/**
 	 * 
 	 */
-	private Field field1;
-	private Field field2;
-	
 	private Player player1;
 	private Player player2;
 	
-	private Player currentPlayer;
-	private Field currentField;
-	private Field.Target target = null;
+	private Player offendingPlayer; 
+	private Player defendingPlayer;
+
 	
 	
 	public void initGame(){
-		field1 = new Field();
-		field2 = new Field();
-		
-		player1 = new PC("pc1");
-		player2 = new PC("pc2");
-		
 		// PC vs PC
-		currentPlayer = player1;
-		currentField = field2;
-		
-		field1.populate();
-		field2.populate();
+		offendingPlayer = player1 = new PC("pc1");	
+		defendingPlayer = player2 = new PC("pc2");
 	}
 	void nextPlayer(){
-		if(currentPlayer == player1){
-			currentPlayer = player2;
-			currentField = field1;
+		if(offendingPlayer == player1){
+			offendingPlayer = player2;
+			defendingPlayer = player1;
 		}else{
-			currentPlayer = player1;
-			currentField = field2;
+			offendingPlayer = player1;
+			defendingPlayer = player2;	
 		}
-		
 	}
 	
 	public void startGame(){
@@ -68,30 +55,30 @@ public class Game {
 			nextPlayer();
 		
 		Point point;
+		Field.AtackResult atackResult;
 		do{
 			try {
 				Thread.sleep(300);
 			} catch (InterruptedException e) {}
 
-			point = currentPlayer.makeShot();
-			target = currentField.surviveBombardment(point.x, point.y);
-			System.out.println(currentPlayer.name  +" " + point.x +" " + point.y);
+			point = offendingPlayer.makeShot();
+			atackResult= defendingPlayer.surviveBombardment(point);
+			System.out.println(offendingPlayer.name  +" " + point.x +" " + point.y);
 			
 			
-			currentPlayer.setResult(target.toString());
-			currentPlayer.updateEnemyView(currentField.renderForEnemy());
-			if(target == Field.Target.MISS)
+			offendingPlayer.setResult(atackResult);
+			offendingPlayer.updateEnemyView(defendingPlayer.renderForEnemy());
+			if(atackResult == Field.AtackResult.MISS)
 				nextPlayer();
 			else
-				System.out.println(currentField.renderForEnemy());
+				System.out.println(defendingPlayer.renderForEnemy());
 
-		}while(target != Field.Target.WIN);
+		}while(atackResult != Field.AtackResult.WIN);
 
-		System.out.println("Player " + currentPlayer + "wins" );
+		System.out.println("Player " + offendingPlayer + "wins" );
 	}
 	public static void main(String[] args){
 		Game game = new Game();
-		game.target = Field.Target.MISS;
 		game.initGame();
 		game.startGame();
 	}

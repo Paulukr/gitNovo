@@ -6,17 +6,19 @@ package mp2.ng.hw.Battleship;
 
 import java.util.Random;
 
+import mp2.ng.hw.Battleship.Field.AtackResult;
+
 /************************************************************/
 /**
  * 
  */
 public class PC extends Player{
-	int[][] tracking = new int[10][10];
-	PC(){
-
-	}
+	int [][] trackingField = new int[10][10];
+	
 	PC(String name){
 		this.name = name;
+		field = new Field();
+		field.populate();
 	}
 	@Override
 	public Point makeShot() {
@@ -24,7 +26,7 @@ public class PC extends Player{
 		Point point = new Point();
 		point.y = random.nextInt(10);
 		point.x = random.nextInt(10);
-		tracking[point.x][point.y] = 1;
+		trackingField[point.x][point.y] = 1;
 		return point;	
 	}
 
@@ -41,10 +43,19 @@ public class PC extends Player{
 	}
 
 	@Override
-	public Point setResult(String s) {
+	public Point setResult(Field.AtackResult atackResult) {
 		// TODO Auto-generated method stub
-		switch(s){
-		case "HIT":
+		switch(atackResult){
+		case HIT:
+			break;
+		case MISS:
+			break;
+		case SANK:
+			break;
+		case WIN:
+			break;
+		default:
+			break;
 		}
 		return null;
 	}

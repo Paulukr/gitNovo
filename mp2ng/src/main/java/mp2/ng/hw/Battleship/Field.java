@@ -37,7 +37,7 @@ public class Field {
 		LEFT, RIGHT, UP, DOWN
 	}
 
-	public enum Target {
+	public enum AtackResult {
 		MISS, HIT, SANK, WIN
 	}
 
@@ -187,19 +187,19 @@ public class Field {
 	}
 
 	//game process
-	public Target surviveBombardment(int x, int y) {
+	public AtackResult surviveBombardment(int x, int y) {
 		Cell cell = cells[y][x];
 		cell.beenBombed();
 		if (!cell.isAShip())
-			return Target.MISS;
+			return AtackResult.MISS;
 		Ship ship = cell.ship;
 		if (ship.surviveBombardment(cell))
-			return Target.HIT;
+			return AtackResult.HIT;
 		ships.remove(ship);
 		if (!ships.isEmpty())
-			return Target.SANK;
+			return AtackResult.SANK;
 		
-		return Target.WIN;
+		return AtackResult.WIN;
 	}
 	
 	//system
