@@ -1,4 +1,4 @@
-package mp2.ng.hw.Battleship;
+package mp2.ng.hw.hw4.Battleship;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -19,16 +19,44 @@ public class GUI {
 	BiConsumer<Integer, Integer> buttonPressed;
 	private JFrame mainFrame;
 	private boolean mainFrameToRepaint;
-	private JButton[][] field = new JButton[fieldSize + 1][fieldSize + 1];
+	private JButton[][] field = new JButton[fieldSize][fieldSize];
+	private Thread getInputThread;
+//	public static void main(String[] args) {
+//		// TODO Auto-generated method stub
+//
+//		GUI g = new GUI();
+//		g.buildGUI();
+//
+//	}
+	class Timer extends Thread{
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-		GUI g = new GUI();
-		g.buildGUI();
-
+		@Override
+		public void run() {
+			System.out.println("try block");
+			try {
+				System.out.println("Waiting button");
+				Thread.sleep(1000000);
+			} catch (InterruptedException e) {
+				System.out.println("getInput awaken");
+			}
+		}
+		
 	}
+	public void getInput(){
+		System.out.println("getInput");
 
+		getInputThread = new Timer();
+		try {
+			System.out.println("start join");
+			getInputThread.start();
+			getInputThread.join();
+			System.out.println("end join");
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			System.out.println("interrupt join");
+			e.printStackTrace();
+		}
+	}
 	public void buildGUI() {
 
 		JPanel buttonPanel = new JPanel();
@@ -73,29 +101,51 @@ public class GUI {
 				field[i][j] = new JButton();
 				field[i][j].addActionListener(new ButtonListener(i, j));
 				fieldPanel.add(field[i][j]);
+//				field[i][j].setText("B");
 			}
 			fieldPanel.add(new JLabel("" + i));// row numbers
 		}
 
 		// mainPanel.setLayout(new BorderLayout());
 		// mainPanel. add(BorderLayout.NORTH, checkBoxPanel);
-		mainFrame = new JFrame("BeatBoxS24l");
+		mainFrame = new JFrame("Battleship");
 		mainFrame.addComponentListener(sqareCL);
-		mainFrame.setSize(400, 400);
+		mainFrame.setSize(500, 500);
 		mainFrame.add(fieldPanel);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setVisible(true);
+		
+		
+		
 
 	}
-	void repairGUI(){
-		new Thread(() -> {
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e1) {}
-			mainFrame.setState(JFrame.ICONIFIED);
-			mainFrame.setState(JFrame.NORMAL);
-			mainFrameToRepaint = false;
-		}).start();
+	public void render(String frame){
+		System.out.println("\n" +frame);
+		String cleanFrame = frame.replaceAll(", ", "").replaceAll("[\\[\\][\\n]]", "");;
+
+		System.out.println("\n" +cleanFrame);
+		if(cleanFrame.length() != (fieldSize)*fieldSize)
+			throw new IllegalArgumentException("frame string size was " + cleanFrame.length());
+		for (int i = 0; i < field.length; i++) {
+			for (int j = 0; j < field[i].length; j++) {
+				String cellState =  cleanFrame.charAt(i*fieldSize +j) + "";
+//				System.out.println(i+" " + j + " :" + cellState);
+				field[i][j].setText(cellState);
+				if(!cellState.equals(" "))
+					field[i][j].setEnabled(false);
+			}
+		}
+	}
+
+	private void repairGUI(){
+//		new Thread(() -> {
+//			try {
+//				Thread.sleep(2000);
+//			} catch (InterruptedException e1) {}
+//			mainFrame.setState(JFrame.ICONIFIED);
+//			mainFrame.setState(JFrame.NORMAL);
+//			mainFrameToRepaint = false;
+//		}).start();
 	}
 
 	private class ButtonListener implements ActionListener {
@@ -109,8 +159,14 @@ public class GUI {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			buttonPressed.accept(i, j);
+			System.out.println("ButtonPressed");
+			buttonPressed.accept(j, i);
+			getInputThread.interrupt();
 		}
 
 	}
+	public void setButtonPressed(BiConsumer<Integer, Integer> buttonPressed) {
+		this.buttonPressed = buttonPressed;
+	}
+	
 }

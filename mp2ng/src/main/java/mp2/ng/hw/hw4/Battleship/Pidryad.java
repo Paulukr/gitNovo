@@ -1,4 +1,4 @@
-package mp2.ng.hw.Battleship;
+package mp2.ng.hw.hw4.Battleship;
 
 import java.util.Arrays;
 import java.util.Random;
