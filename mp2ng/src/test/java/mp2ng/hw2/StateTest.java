@@ -16,6 +16,7 @@ import mp2.ng.hw.hw2.t7.p1.Region;
 import mp2.ng.hw.hw2.t7.p1.State;
 
 public class StateTest {
+	
 	static class StackWithSum extends Stack<District>{ 
 		private static final long serialVersionUID = 7484795328940043589L;
 		double sum;
