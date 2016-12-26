@@ -27,7 +27,7 @@ public class GUI {
 	JTextArea incoming;
 	JTextField outgoing;
 	JLabel ipAddressLabel;
-	String defaulIPAddress = "192.168.10.117";
+	String defaulIPAddress = "localhost";
 	int defaultPort = 20000;
 	
 	ChatClientC client;

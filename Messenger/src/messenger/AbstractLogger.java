@@ -61,10 +61,15 @@ abstract class AbstractLogger {
 		Timestamp ts;
 		LogEntry(int clientNo, String message, String...str){
 			this.clientNo = clientNo;
-			data[1] = message;
+			data[0] = message;
 			for(int i = 0; (i < str.length)&&(i < 4); i++) data[i+1] = str[i];
 			if(str.length > 4) System.out.println("too arguments for log");//slog(clientNo, "too arguments " + str[5] + " ...");
 			ts  = Timestamp.from(Instant.now());
+		}
+		public String toString(){
+			String rs = Integer.toString(clientNo);
+			for(String s:data) rs+= ", " + s;
+			return rs+= ", " + ts.toString();
 		}
 	}//end inner class
 

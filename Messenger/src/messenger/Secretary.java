@@ -1,6 +1,6 @@
 package messenger;
 
-import day3.MyPGsql;
+import psql.MyPGsql;
 
 public class Secretary implements StringListener {
 	ChatClientC socket;
