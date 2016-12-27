@@ -7,6 +7,7 @@ package mp2.ng.hw.hw4.Battleship;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiConsumer;
 
 import mp2.ng.hw.hw4.Battleship.Field;
 import mp2.ng.hw.hw4.Battleship.Player;
@@ -28,14 +29,51 @@ public class Game {
 	private Player player1;
 	private Player player2;
 	
+	AbstractView view1;
+	AbstractView view2;
+	
+	BiConsumer<AbstractView, Point> viewListener;
+	
+	
 	private Player offendingPlayer; 
-	public void initGame(){
-		// PC vs PC
-		offendingPlayer = player1 = new PlayerGUI("GUI1");	
-		player2 = new PC("pc2");
+	int turn ;
+	public void initGame(String mode){
+		viewListener = this::gameProcess;
 		
-		player1.enemy = player2;
-		player2.enemy = player1;
+		view1 = new GUI("player1", viewListener);
+		view2 = new GUI("player2", viewListener);
+		
+		switch (mode) {
+		case "PC vs PC":
+			player1 = new PC("pc1", view1, view2);
+			player2 = new PC("pc2", view2, view1);
+			break;
+		case "P vs PC":
+			player1 = new PlayerGUI("player1", view1, view2);	
+			player2 = new PC("pc2", view2, view1);
+			break;
+		case "P vs P":
+			player1 = new PlayerGUI("player1", view1, view2);	
+			player2 = new PlayerGUI("player2", view2, view1);	
+			break;
+		default:
+			System.out.println("Invalid argument");
+			System.exit(0);
+			break;
+		}
+		player1.setEnemy(player2);
+		player2.setEnemy(player1);
+	}
+	public void gameProcess(AbstractView view, Point point){
+		if(view == offendingPlayer.view){
+			Field.AtackResult atackResult;
+			atackResult = offendingPlayer.enemy.surviveBombardment(point);
+
+			if(atackResult == Field.AtackResult.MISS)
+				nextPlayer();
+			if(atackResult == Field.AtackResult.WIN)
+				System.out.println("Player " + offendingPlayer + " wins" );
+		}
 	}
 	void nextPlayer(){
 		if(offendingPlayer == player1){
@@ -43,48 +81,22 @@ public class Game {
 		}else{
 			offendingPlayer = player1;	
 		}
+		offendingPlayer.view.enable(true);
+		offendingPlayer.enemyView.enable(false);
 	}
-	private static class Test{
-		private void name() {
-			System.out.println("Test");
-		}
-	}
-	private static class Test2 extends Test{
-		public void name() {
-			System.out.println("Test2");
-		}
-	}
+
 	public void startGame(){
-		new Test().name();
-		Test t1 = new Test2();
-		t1.name();
+		
 		//choose who's first
+		nextPlayer();
 		Random random = new Random();
 		if(random.nextBoolean())
 			nextPlayer();
 		
-		int turn = 0;
-		Field.AtackResult atackResult;
-		do{
-			System.out.println(offendingPlayer.name  + " turn " + ++turn);
-			try {
-				Thread.sleep(300);
-			} catch (InterruptedException e) {}
-			
-			atackResult = offendingPlayer.makeTurn();
-
-			if(atackResult == Field.AtackResult.MISS)
-				nextPlayer();
-//			else
-//				System.out.println(offendingPlayer.enemy.renderForEnemy());
-
-		}while(atackResult != Field.AtackResult.WIN);
-
-		System.out.println("Player " + offendingPlayer + " wins" );
 	}
 	public static void main(String[] args){
 		Game game = new Game();
-		game.initGame();
+		game.initGame("P vs P");
 		game.startGame();
 	}
 }

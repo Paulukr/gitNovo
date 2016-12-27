@@ -15,31 +15,45 @@ import java.util.Objects;
 	Player enemy;
 	Field field;
 
-	int[][] tracing = new int[10][10];
+	int[][] tracing = new int[Field.FIELD_SIZE][Field.FIELD_SIZE];
 	
+	AbstractView view;
+	AbstractView enemyView;
+
+	public Player(String name, AbstractView view, AbstractView enemyView) {
+		this.name = name;
+		this.view = view;
+		this.enemyView = enemyView;
+
+		field = new Field();
+	}
 	public static class Point{
 		int x;
 		int y;
+		public Point(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+		
 	}
-	public abstract Point makeShot();
-	public Field.AtackResult  makeTurn(){
 
-		
-//		offendingPlayer.setResult(atackResult);
-//		updateEnemyView
-//		enemy.updateEnemyView(renderForEnemy());
-		
-//		offendingPlayer.updateEnemyView(defendingPlayer.renderForEnemy());
-		 Field.AtackResult  atackResult = Objects.requireNonNull(enemy).surviveBombardment(makeShot());
-		 updateEnemyView(enemy.renderForEnemy());
-		 return atackResult;
+	public void setEnemy(Player enemy) {
+		this.enemy = enemy;
+		init();
 	}
-	
+	private void init(){
+		Objects.requireNonNull(enemy);
+		Objects.requireNonNull(view);
+		Objects.requireNonNull(enemyView);
+	}
 	public abstract Point setResult(Field.AtackResult atackResult);
 	public abstract void updateOwnView(String field);
 	public abstract void updateEnemyView(String field);
 	public Field.AtackResult surviveBombardment(Point point){
-		return field.surviveBombardment(point.x, point.y);
+		Field.AtackResult  atackResult =  field.surviveBombardment(point.x, point.y);
+		view.updateField(field.toString());
+		enemyView.updateTracingField(renderForEnemy());
+		return atackResult;
 	}
 	@Override
 	public String toString(){

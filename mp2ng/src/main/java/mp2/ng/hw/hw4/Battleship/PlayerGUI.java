@@ -6,21 +6,10 @@ public class PlayerGUI extends Player {
 	private GUI gui;
 	Point target;
 	
-	public PlayerGUI(String name) {
-		this.name = name;
-		field = new Field();
-		field.populate();
+	public PlayerGUI(String name, AbstractView view, AbstractView enemyView) {
+		super(name, view, enemyView);
 		
-		gui = new GUI();
-		gui.setButtonPressed((x, y) -> {target.x = x; target.y = y; });
-		gui.buildGUI();
-		target = new Point();
-	}
-
-	@Override
-	public Point makeShot() {
-		gui.getInput();
-		return target;
+		field.populate();
 	}
 
 	@Override
@@ -38,7 +27,8 @@ public class PlayerGUI extends Player {
 	@Override
 	public void updateEnemyView(String field) {
 		// TODO Auto-generated method stub
-		gui.render(field);
+		
 	}
+
 
 }

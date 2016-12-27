@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.Arrays;
 import java.util.function.BiConsumer;
 
 import javax.swing.BoxLayout;
@@ -14,13 +15,24 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class GUI {
+import mp2.ng.hw.hw4.Battleship.Player.Point;
+
+public class GUI extends AbstractView{
+	public GUI(String name, BiConsumer<AbstractView, Point> controller) {
+		super(controller);
+		this.name = name;
+		buildGUI();
+		char[] temp = new char[100];
+		Arrays.fill(temp, ' ');
+		tracingLastFrame = new String(temp);
+	}
+	String name;
 	int fieldSize = 10;
-	BiConsumer<Integer, Integer> buttonPressed;
-	private JFrame mainFrame;
+	private JFrame tracingFrame;
 	private boolean mainFrameToRepaint;
-	private JButton[][] field = new JButton[fieldSize][fieldSize];
+	private JButton[][] tracingField = new JButton[fieldSize][fieldSize];
 	private Thread getInputThread;
+	String tracingLastFrame;
 //	public static void main(String[] args) {
 //		// TODO Auto-generated method stub
 //
@@ -66,8 +78,8 @@ public class GUI {
 			
 			@Override
 			public void componentResized(ComponentEvent arg0) {
-				Dimension d = mainFrame.getSize();
-				mainFrame.setSize(new Dimension(Math.min(d.width, d.height), Math.min(d.width, d.height)));
+				Dimension d = tracingFrame.getSize();
+				tracingFrame.setSize(new Dimension(Math.min(d.width, d.height), Math.min(d.width, d.height)));
 				d = buttonPanel.getSize();
 				buttonPanel.setSize(new Dimension(Math.min(d.width, d.height), Math.min(d.width, d.height)));
 				if(!mainFrameToRepaint){
@@ -98,54 +110,32 @@ public class GUI {
 
 		for (int i = 0; i < fieldSize; i++) {
 			for (int j = 0; j < fieldSize; j++) {
-				field[i][j] = new JButton();
-				field[i][j].addActionListener(new ButtonListener(i, j));
-				fieldPanel.add(field[i][j]);
-//				field[i][j].setText("B");
+				tracingField[i][j] = new JButton();
+				tracingField[i][j].addActionListener(new ButtonListener(i, j));
+				fieldPanel.add(tracingField[i][j]);
+
 			}
 			fieldPanel.add(new JLabel("" + i));// row numbers
 		}
 
-		// mainPanel.setLayout(new BorderLayout());
-		// mainPanel. add(BorderLayout.NORTH, checkBoxPanel);
-		mainFrame = new JFrame("Battleship");
-		mainFrame.addComponentListener(sqareCL);
-		mainFrame.setSize(500, 500);
-		mainFrame.add(fieldPanel);
-		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		mainFrame.setVisible(true);
+		tracingFrame = new JFrame(name + "trace");
+		tracingFrame.addComponentListener(sqareCL);
+		tracingFrame.setSize(500, 500);
+		tracingFrame.add(fieldPanel);
+		tracingFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		tracingFrame.setVisible(true);
 		
-		
-		
-
-	}
-	public void render(String frame){
-		System.out.println("\n" +frame);
-		String cleanFrame = frame.replaceAll(", ", "").replaceAll("[\\[\\][\\n]]", "");;
-
-		System.out.println("\n" +cleanFrame);
-		if(cleanFrame.length() != (fieldSize)*fieldSize)
-			throw new IllegalArgumentException("frame string size was " + cleanFrame.length());
-		for (int i = 0; i < field.length; i++) {
-			for (int j = 0; j < field[i].length; j++) {
-				String cellState =  cleanFrame.charAt(i*fieldSize +j) + "";
-//				System.out.println(i+" " + j + " :" + cellState);
-				field[i][j].setText(cellState);
-				if(!cellState.equals(" "))
-					field[i][j].setEnabled(false);
-			}
-		}
 	}
 
 	private void repairGUI(){
-//		new Thread(() -> {
-//			try {
-//				Thread.sleep(2000);
-//			} catch (InterruptedException e1) {}
-//			mainFrame.setState(JFrame.ICONIFIED);
-//			mainFrame.setState(JFrame.NORMAL);
-//			mainFrameToRepaint = false;
-//		}).start();
+		new Thread(() -> {
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e1) {}
+			tracingFrame.setState(JFrame.ICONIFIED);
+			tracingFrame.setState(JFrame.NORMAL);
+			mainFrameToRepaint = false;
+		}).start();
 	}
 
 	private class ButtonListener implements ActionListener {
@@ -160,13 +150,42 @@ public class GUI {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			System.out.println("ButtonPressed");
-			buttonPressed.accept(j, i);
+			controller.accept(GUI.this, new Point(j,i));
 			getInputThread.interrupt();
 		}
 
 	}
-	public void setButtonPressed(BiConsumer<Integer, Integer> buttonPressed) {
-		this.buttonPressed = buttonPressed;
+	@Override
+	public void updateTracingField(String frame) {
+		System.out.println("\n" +frame);
+		String cleanFrame = frame.replaceAll(", ", "").replaceAll("[\\[\\][\\n]]", "");;
+
+		System.out.println("\n" +cleanFrame);
+		if(cleanFrame.length() != (fieldSize)*fieldSize)
+			throw new IllegalArgumentException("frame string size was " + cleanFrame.length());
+		for (int i = 0; i < tracingField.length; i++) {
+			for (int j = 0; j < tracingField[i].length; j++) {
+				String cellState =  cleanFrame.charAt(i*fieldSize +j) + "";
+//				System.out.println(i+" " + j + " :" + cellState);
+				tracingField[i][j].setText(cellState);
+				if(!cellState.equals(" "))
+					tracingField[i][j].setEnabled(false);
+			}
+		}
+		tracingLastFrame = frame;
 	}
-	
+
+	@Override
+	void enable(boolean enabled) {
+		for (int i = 0; i < tracingField.length; i++) {
+			for (int j = 0; j < tracingField[i].length; j++) {
+				tracingField[i][j].setEnabled(enabled);
+			}
+		}
+		if(enabled)
+			updateTracingField(tracingLastFrame);
+	}
+	@Override
+	void updateField(String frame) {
+	}
 }
